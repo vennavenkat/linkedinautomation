@@ -44,7 +44,7 @@ npm start
 npm run dev
 ```
 
-## i18n 🈶
+## i18n 
 If you would like to add a different language for internationalization, simply create the json file in the `i18n` directory with the language initials and add the translations.
 
 example: 
