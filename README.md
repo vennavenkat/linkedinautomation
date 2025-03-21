@@ -15,12 +15,12 @@ git pull
 
 ## Clone the repo
 ```shell
-git clone https://github.com/chunkingz/linkedInEasyApplyBot.git
+git clone https://https://github.com/vennavenkat/linkedinautomation.git
 ```
 
 ## Initialize the app
 ```shell
-cd linkedInEasyApplyBot && npm i
+cd linkedinautomation && npm i
 ```
 
 ## Add .env

@@ -20,7 +20,7 @@ const {
   numberOfJobsPerPage,
   avoidJobTitles,
   avoidCompanies,
-  startPage = 2  // Add this line
+  startPage = 2, // Add this line
 } = data;
 
 const t = require(`./i18n/${locale}.json`);
@@ -39,7 +39,9 @@ function logs() {
 async function login() {
   // Check if already logged in by looking for the sign-in button
   const isLoggedIn = await page.evaluate(() => {
-    return !document.querySelector('[data-tracking-control-name="guest_homepage-basic_sign-in-button"]');
+    return !document.querySelector(
+      '[data-tracking-control-name="guest_homepage-basic_sign-in-button"]'
+    );
   });
 
   if (!isLoggedIn) {
@@ -57,7 +59,7 @@ async function initializer() {
     args: [resolution],
     defaultViewport: null,
     timeout: 60000,
-    userDataDir: "./userData"  // Enable persistent session storage
+    userDataDir: "./userData", // Enable persistent session storage
   });
   page = await browser.newPage();
   const pages = await browser.pages();
@@ -92,8 +94,8 @@ async function clickElement(selector, timeout = 10000) {
     const element = await page.$(selector);
     if (element) {
       // Scroll element into view before clicking
-      await page.evaluate(el => {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      await page.evaluate((el) => {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
       }, element);
       await pause(1000);
       await element.click();
@@ -144,7 +146,7 @@ async function getEasyApplySelector() {
     'button[aria-label="Easy Apply filter"]',
     'button[aria-label="Easy Apply filter."]',
     '[type="checkbox"][name="f_LF"]',
-    '.search-reusables__filter-binary-toggle'
+    ".search-reusables__filter-binary-toggle",
   ];
 
   for (const selector of possibleSelectors) {
@@ -155,7 +157,7 @@ async function getEasyApplySelector() {
       continue;
     }
   }
-  console.warn('Easy Apply filter not found, continuing without it...');
+  console.warn("Easy Apply filter not found, continuing without it...");
   return null;
 }
 
@@ -180,10 +182,10 @@ async function filterByTime() {
     const timeFilterSelectors = [
       'button[aria-label="Date posted filter"]',
       'button[aria-label="Date posted filter."]',
-      '[data-test-filters-time-filter-button]',
+      "[data-test-filters-time-filter-button]",
       '[aria-label*="Time filter"]',
-      'button.search-reusables__filter-pill',
-      'button[aria-label*="date posted"]'
+      "button.search-reusables__filter-pill",
+      'button[aria-label*="date posted"]',
     ];
 
     let filterOpened = false;
@@ -204,10 +206,11 @@ async function filterByTime() {
     if (!filterOpened) {
       // Try finding the filter by text content
       await page.evaluate(() => {
-        const elements = [...document.querySelectorAll('button')];
-        const dateButton = elements.find(el => 
-          el.textContent.toLowerCase().includes('date posted') ||
-          el.textContent.toLowerCase().includes('time posted')
+        const elements = [...document.querySelectorAll("button")];
+        const dateButton = elements.find(
+          (el) =>
+            el.textContent.toLowerCase().includes("date posted") ||
+            el.textContent.toLowerCase().includes("time posted")
         );
         if (dateButton) dateButton.click();
       });
@@ -216,13 +219,16 @@ async function filterByTime() {
 
     // Try to select "Past 24 hours" using the artdeco-button__text class
     const selected = await page.evaluate(() => {
-      const options = Array.from(document.querySelectorAll('.artdeco-button__text'));
-      const pastDayOption = options.find(el => 
-        el.textContent.trim().toLowerCase().includes('past 24 hours') ||
-        el.textContent.trim().toLowerCase().includes('past day')
+      const options = Array.from(
+        document.querySelectorAll(".artdeco-button__text")
+      );
+      const pastDayOption = options.find(
+        (el) =>
+          el.textContent.trim().toLowerCase().includes("past 24 hours") ||
+          el.textContent.trim().toLowerCase().includes("past day")
       );
       if (pastDayOption) {
-        pastDayOption.closest('button').click();
+        pastDayOption.closest("button").click();
         return true;
       }
       return false;
@@ -234,12 +240,14 @@ async function filterByTime() {
         '[for="timePostedRange-r86400"]',
         'input[value="r86400"]',
         '[aria-label*="Past 24 hours"]',
-        '[type="radio"][value="r86400"]'
+        '[type="radio"][value="r86400"]',
       ];
 
       for (const selector of timeOptions) {
         try {
-          const element = await page.waitForSelector(selector, { timeout: 3000 });
+          const element = await page.waitForSelector(selector, {
+            timeout: 3000,
+          });
           if (element) {
             await element.click();
             break;
@@ -254,10 +262,10 @@ async function filterByTime() {
 
     // Click show results button
     const showResultsSelectors = [
-      'button.artdeco-button--primary',
-      'button[data-test-filters-apply-button]',
-      '.artdeco-modal__actionbar button:last-child',
-      'button.search-reusables__secondary-filters-show-results-button'
+      "button.artdeco-button--primary",
+      "button[data-test-filters-apply-button]",
+      ".artdeco-modal__actionbar button:last-child",
+      "button.search-reusables__secondary-filters-show-results-button",
     ];
 
     for (const selector of showResultsSelectors) {
@@ -275,28 +283,29 @@ async function filterByTime() {
 
     // Verify filter application
     const isFilterApplied = await page.evaluate(() => {
-      const pillTexts = Array.from(document.querySelectorAll('.search-reusables__filter-pill'))
-        .map(pill => pill.textContent.toLowerCase());
-      
-      const hasDatePill = pillTexts.some(text => 
-        text.includes('24') || 
-        text.includes('past day') || 
-        text.includes('hour')
+      const pillTexts = Array.from(
+        document.querySelectorAll(".search-reusables__filter-pill")
+      ).map((pill) => pill.textContent.toLowerCase());
+
+      const hasDatePill = pillTexts.some(
+        (text) =>
+          text.includes("24") ||
+          text.includes("past day") ||
+          text.includes("hour")
       );
 
-      const hasDateInUrl = window.location.href.includes('f_TPR=r86400');
+      const hasDateInUrl = window.location.href.includes("f_TPR=r86400");
 
       return hasDatePill || hasDateInUrl;
     });
 
     if (!isFilterApplied) {
-      throw new Error('Date filter not applied');
+      throw new Error("Date filter not applied");
     }
-
   } catch (error) {
-    console.warn('Error in filterByTime:', error.message);
+    console.warn("Error in filterByTime:", error.message);
     // Continue with search even if filter fails
-    console.log('Proceeding with available search results...');
+    console.log("Proceeding with available search results...");
   }
 }
 
@@ -390,15 +399,20 @@ async function getLink() {
 const getTotalJobResult = async () => {
   try {
     // Wait for the element to be available
-    await page.waitForSelector("[class*='jobs-search-results-list__subtitle']", { timeout: 5000 });
-    
+    await page.waitForSelector(
+      "[class*='jobs-search-results-list__subtitle']",
+      { timeout: 5000 }
+    );
+
     const jobResultString = await page.evaluate(() => {
-      const el = document.querySelector("[class*='jobs-search-results-list__subtitle']");
+      const el = document.querySelector(
+        "[class*='jobs-search-results-list__subtitle']"
+      );
       if (!el) return "0";
       const text = el.innerText || "0";
       return text.split(" ")[0] || "0";
     });
-    
+
     return jobResultString.split(",").join("") || "0";
   } catch (error) {
     console.warn("Could not get total job count:", error.message);
@@ -419,19 +433,23 @@ const closeJobApplicationDialog = async () => {
 const getNextButton = async () => {
   try {
     // Wait for the pagination container to load
-    await page.waitForSelector('.artdeco-pagination', { timeout: 5000 });
+    await page.waitForSelector(".artdeco-pagination", { timeout: 5000 });
 
     // Handle numbered pagination
     const nextButton = await page.evaluate(() => {
-      const paginationItems = document.querySelectorAll('.artdeco-pagination__pages .artdeco-pagination__indicator');
-      const activePage = Array.from(paginationItems).find(item => item.classList.contains('active'));
-      
+      const paginationItems = document.querySelectorAll(
+        ".artdeco-pagination__pages .artdeco-pagination__indicator"
+      );
+      const activePage = Array.from(paginationItems).find((item) =>
+        item.classList.contains("active")
+      );
+
       if (activePage) {
         const nextPage = activePage.nextElementSibling;
-        if (nextPage && nextPage.tagName === 'LI') {
-          const nextButton = nextPage.querySelector('button');
+        if (nextPage && nextPage.tagName === "LI") {
+          const nextButton = nextPage.querySelector("button");
           if (nextButton && !nextButton.disabled) {
-            return nextButton.getAttribute('aria-label');
+            return nextButton.getAttribute("aria-label");
           }
         }
       }
@@ -444,13 +462,15 @@ const getNextButton = async () => {
 
     // Fallback to sibling-based navigation if numbered pagination fails
     const fallbackNextButton = await page.evaluate(() => {
-      const activePage = document.querySelector('.artdeco-pagination__indicator--number.active');
+      const activePage = document.querySelector(
+        ".artdeco-pagination__indicator--number.active"
+      );
       if (activePage) {
         const nextSibling = activePage.parentElement.nextElementSibling;
         if (nextSibling) {
-          const nextButton = nextSibling.querySelector('button');
+          const nextButton = nextSibling.querySelector("button");
           if (nextButton && !nextButton.disabled) {
-            return nextButton.getAttribute('aria-label');
+            return nextButton.getAttribute("aria-label");
           }
         }
       }
@@ -463,7 +483,7 @@ const getNextButton = async () => {
 
     return null;
   } catch (error) {
-    console.warn('Error finding next button:', error.message);
+    console.warn("Error finding next button:", error.message);
     return null;
   }
 };
@@ -476,24 +496,21 @@ async function handleApplicationForm() {
       'button[aria-label*="Next"]',
       'button[aria-label*="Continue"]',
       'button[aria-label*="Submit"]',
-      'button.artdeco-button--primary',
+      "button.artdeco-button--primary",
       'div[class*="justify-flex-end"] button:last-child',
-      'footer button:last-child'
+      "footer button:last-child",
     ],
-    review: [
-      'button[aria-label*="Review"]',
-      'button:contains("Review")'
-    ],
+    review: ['button[aria-label*="Review"]', 'button:contains("Review")'],
     submit: [
       'button[aria-label*="Submit"]',
       'button:contains("Submit")',
-      'button.jobs-apply-button'
+      "button.jobs-apply-button",
     ],
     dismiss: [
-      '.artdeco-modal__dismiss',
+      ".artdeco-modal__dismiss",
       'button[aria-label="Dismiss"]',
-      'button[aria-label="Close"]'
-    ]
+      'button[aria-label="Close"]',
+    ],
   };
 
   let formCompleted = false;
@@ -506,7 +523,7 @@ async function handleApplicationForm() {
 
       // Check if we're on the final submit screen
       const submitVisible = await page.evaluate((selectors) => {
-        return selectors.submit.some(sel => {
+        return selectors.submit.some((sel) => {
           const btn = document.querySelector(sel);
           return btn && btn.offsetParent !== null;
         });
@@ -547,9 +564,11 @@ async function handleApplicationForm() {
         formCompleted = true;
         break;
       }
-
     } catch (error) {
-      console.warn(`Form interaction attempt ${attempts + 1} failed:`, error.message);
+      console.warn(
+        `Form interaction attempt ${attempts + 1} failed:`,
+        error.message
+      );
     }
     attempts++;
   }
@@ -572,9 +591,9 @@ async function handleJobApplication() {
         '[data-control-name="discard_application_confirm_btn"]',
         'button[aria-label="Dismiss"]',
         'button[aria-label="Cancel application"]',
-        '.artdeco-modal__dismiss'
+        ".artdeco-modal__dismiss",
       ];
-      
+
       for (const selector of discardSelectors) {
         await clickElement(selector, 3000);
       }
@@ -582,7 +601,7 @@ async function handleJobApplication() {
     }
     return true;
   } catch (error) {
-    console.error('Application error:', error.message);
+    console.error("Application error:", error.message);
     return false;
   }
 }
@@ -600,40 +619,44 @@ const fillAndApply = async () => {
       const nextButtonSelector = await getNextButton();
       if (nextButtonSelector) {
         await page.evaluate(() => {
-          const pagination = document.querySelector('.artdeco-pagination');
+          const pagination = document.querySelector(".artdeco-pagination");
           if (pagination) {
-            pagination.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            pagination.scrollIntoView({ behavior: "smooth", block: "center" });
           }
         });
-        
+
         await pause(3000);
-        
+
         try {
           await Promise.all([
-            page.waitForNavigation({ 
-              waitUntil: ['networkidle0', 'domcontentloaded'],
-              timeout: 30000 
+            page.waitForNavigation({
+              waitUntil: ["networkidle0", "domcontentloaded"],
+              timeout: 30000,
             }),
-            page.click(nextButtonSelector)
+            page.click(nextButtonSelector),
           ]);
-          
+
           await page.waitForFunction(
             (expectedPage) => {
-              const active = document.querySelector('.artdeco-pagination__indicator--active');
-              return active && parseInt(active.textContent.trim()) === expectedPage;
+              const active = document.querySelector(
+                ".artdeco-pagination__indicator--active"
+              );
+              return (
+                active && parseInt(active.textContent.trim()) === expectedPage
+              );
             },
             { timeout: 10000 },
             currentPage + 1
           );
-          
+
           currentPage++;
           await pause(5000);
         } catch (error) {
-          console.error('Failed to navigate to start page:', error.message);
+          console.error("Failed to navigate to start page:", error.message);
           break;
         }
       } else {
-        console.log('Could not find next page button');
+        console.log("Could not find next page button");
         break;
       }
     }
@@ -643,22 +666,24 @@ const fillAndApply = async () => {
   while (hasNextPage) {
     console.log(`\nProcessing page ${currentPage}`);
     await pause(3000);
-    
+
     // Get current page job IDs to track duplicates
     const currentPageJobs = await page.evaluate(() => {
-      const jobCards = document.querySelectorAll('.job-card-container');
-      return Array.from(jobCards).map(card => card.getAttribute('data-job-id'));
+      const jobCards = document.querySelectorAll(".job-card-container");
+      return Array.from(jobCards).map((card) =>
+        card.getAttribute("data-job-id")
+      );
     });
 
     // Check if we're seeing the same jobs
-    const newJobs = currentPageJobs.filter(id => !previousJobs.has(id));
+    const newJobs = currentPageJobs.filter((id) => !previousJobs.has(id));
     if (newJobs.length === 0) {
-      console.log('No new jobs found, ending search...');
+      console.log("No new jobs found, ending search...");
       break;
     }
 
     // Add current jobs to tracking set
-    currentPageJobs.forEach(id => previousJobs.add(id));
+    currentPageJobs.forEach((id) => previousJobs.add(id));
 
     for (let index = 0; index < numberOfJobsPerPage; index++) {
       if (currentJobIndex > totalJobCount) {
@@ -773,73 +798,87 @@ const fillAndApply = async () => {
         await page.evaluate(() => {
           // Handle radio buttons and checkboxes
           const radioButtons = document.querySelectorAll('input[type="radio"]');
-          radioButtons.forEach(radio => {
-            const label = radio.labels?.[0]?.textContent.toLowerCase() || '';
-            if (label.includes('yes') || label.includes('oui')) {
+          radioButtons.forEach((radio) => {
+            const label = radio.labels?.[0]?.textContent.toLowerCase() || "";
+            if (label.includes("yes") || label.includes("oui")) {
               radio.click();
             }
           });
 
           // Handle dropdowns
-          const selects = document.querySelectorAll('select');
-          selects.forEach(select => {
+          const selects = document.querySelectorAll("select");
+          selects.forEach((select) => {
             const options = Array.from(select.options);
             // Try to find "Yes" option first
-            const yesOption = options.find(opt => 
-              opt.text.toLowerCase().includes('yes') ||
-              opt.text.toLowerCase().includes('oui')
+            const yesOption = options.find(
+              (opt) =>
+                opt.text.toLowerCase().includes("yes") ||
+                opt.text.toLowerCase().includes("oui")
             );
             if (yesOption) {
               select.value = yesOption.value;
             } else {
               // If no "Yes" option, select the first non-empty option
-              const firstValidOption = options.find(opt => opt.value);
+              const firstValidOption = options.find((opt) => opt.value);
               if (firstValidOption) {
                 select.value = firstValidOption.value;
               }
             }
-            select.dispatchEvent(new Event('change', { bubbles: true }));
+            select.dispatchEvent(new Event("change", { bubbles: true }));
           });
 
           // Handle text/number inputs
-          const inputs = document.querySelectorAll('input[type="text"], input[type="number"]');
-          inputs.forEach(input => {
-            const label = input.labels?.[0]?.textContent.toLowerCase() || '';
-            const placeholder = input.placeholder?.toLowerCase() || '';
-            const ariaLabel = input.getAttribute('aria-label')?.toLowerCase() || '';
-            let value = '';
+          const inputs = document.querySelectorAll(
+            'input[type="text"], input[type="number"]'
+          );
+          inputs.forEach((input) => {
+            const label = input.labels?.[0]?.textContent.toLowerCase() || "";
+            const placeholder = input.placeholder?.toLowerCase() || "";
+            const ariaLabel =
+              input.getAttribute("aria-label")?.toLowerCase() || "";
+            let value = "";
 
             // Default to 5 years for experience-related fields
-            if (label.includes('experience') || 
-                label.includes('years') ||
-                placeholder.includes('experience') ||
-                placeholder.includes('years') ||
-                ariaLabel.includes('experience') ||
-                ariaLabel.includes('years')) {
-              value = '5';
+            if (
+              label.includes("experience") ||
+              label.includes("years") ||
+              placeholder.includes("experience") ||
+              placeholder.includes("years") ||
+              ariaLabel.includes("experience") ||
+              ariaLabel.includes("years")
+            ) {
+              value = "5";
             }
             // Handle salary expectations
-            else if (label.includes('salary') || 
-                     placeholder.includes('salary') ||
-                     ariaLabel.includes('salary')) {
-              value = '85000';
+            else if (
+              label.includes("salary") ||
+              placeholder.includes("salary") ||
+              ariaLabel.includes("salary")
+            ) {
+              value = "85000";
+            } else if (
+              label.includes("sponsorship") ||
+              placeholder.includes("sponsorship") ||
+              ariaLabel.includes("sponsorship")
+            ) {
+              value = "No";
             }
             // Handle other numeric fields
-            else if (input.type === 'number') {
-              value = '5';
+            else if (input.type === "number") {
+              value = "5";
             }
             // Handle text fields
             else {
-              value = ' '; // Space character for required text fields
+              value = " "; // Space character for required text fields
             }
 
             const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
               window.HTMLInputElement.prototype,
-              'value'
+              "value"
             ).set;
             nativeInputValueSetter.call(input, value);
-            input.dispatchEvent(new Event('input', { bubbles: true }));
-            input.dispatchEvent(new Event('change', { bubbles: true }));
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            input.dispatchEvent(new Event("change", { bubbles: true }));
           });
         });
 
@@ -904,36 +943,40 @@ const fillAndApply = async () => {
 
     await Scrolling();
     const nextButtonSelector = await getNextButton();
-    
+
     if (nextButtonSelector) {
       try {
         console.log("\nMoving to page " + (currentPage + 1));
-        
+
         // Scroll to pagination area
         await page.evaluate(() => {
-          const pagination = document.querySelector('.artdeco-pagination');
+          const pagination = document.querySelector(".artdeco-pagination");
           if (pagination) {
-            pagination.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            pagination.scrollIntoView({ behavior: "smooth", block: "center" });
           }
         });
-        
+
         await pause(2000);
 
         // Click and wait for navigation with more reliable checks
         try {
           await Promise.all([
-            page.waitForNavigation({ 
-              waitUntil: ['networkidle0', 'domcontentloaded'],
-              timeout: 30000 
+            page.waitForNavigation({
+              waitUntil: ["networkidle0", "domcontentloaded"],
+              timeout: 30000,
             }),
-            page.click(nextButtonSelector)
+            page.click(nextButtonSelector),
           ]);
 
           // Verify page change was successful
           await page.waitForFunction(
             (expectedPage) => {
-              const active = document.querySelector('.artdeco-pagination__indicator--active');
-              return active && parseInt(active.textContent.trim()) === expectedPage;
+              const active = document.querySelector(
+                ".artdeco-pagination__indicator--active"
+              );
+              return (
+                active && parseInt(active.textContent.trim()) === expectedPage
+              );
             },
             { timeout: 10000 },
             currentPage + 1
@@ -943,7 +986,7 @@ const fillAndApply = async () => {
           hasNextPage = true;
           await pause(5000); // Allow more time for content to load
         } catch (navError) {
-          console.log('Navigation error, retrying with alternate method...');
+          console.log("Navigation error, retrying with alternate method...");
           // Fallback click method
           await page.evaluate((sel) => {
             const button = document.querySelector(sel);
@@ -954,11 +997,11 @@ const fillAndApply = async () => {
           hasNextPage = true;
         }
       } catch (error) {
-        console.log('Error navigating to next page:', error.message);
+        console.log("Error navigating to next page:", error.message);
         hasNextPage = false;
       }
     } else {
-      console.log('\nNo more pages available');
+      console.log("\nNo more pages available");
       hasNextPage = false;
     }
   }
@@ -971,21 +1014,21 @@ async function filterAndSearch() {
     await filterByLocation();
     await page.keyboard.press("Enter");
     await pause(2000);
-    
+
     const easyApplySelector = await getEasyApplySelector();
     if (easyApplySelector) {
       await easyApplyFilter();
       await pause(1000);
     }
-    
+
     await filterByTime();
     await pause(2000);
     await filterByType();
     await pause(2000);
   } catch (error) {
-    console.error('Error in filterAndSearch:', error.message);
+    console.error("Error in filterAndSearch:", error.message);
     // If filtering fails, try to continue with the search anyway
-    console.log('Continuing with available search results...');
+    console.log("Continuing with available search results...");
   }
 }
 
