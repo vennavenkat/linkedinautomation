@@ -1,0 +1,5 @@
+.env
+node_modules
+report.csv
+package-lock.json
+userData

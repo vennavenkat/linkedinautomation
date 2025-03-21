@@ -1,0 +1,21 @@
+{
+    "version": "1.0.15",
+    "main": "index.js",
+    "author": "Fortune King",
+    "scripts": {
+        "start": "node index.js",
+        "dev": "nodemon index.js",
+        "bump": "npm version patch"
+    },
+    "dependencies": {
+        "csv-writer": "^1.6.0",
+        "dotenv": "^16.4.5",
+        "puppeteer": "^23.9.0",
+        "puppeteer-core": "^23.9.0",
+        "puppeteer-extra": "^3.3.6",
+        "puppeteer-extra-plugin-stealth": "^2.11.2"
+    },
+    "devDependencies": {
+        "nodemon": "^3.1.7"
+    }
+}

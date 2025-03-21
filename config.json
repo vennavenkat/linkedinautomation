@@ -1,0 +1,55 @@
+{
+  "locale": "en",
+  "browserPath":"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+
+  "keyword": [
+    "Java spring boot"
+  ],
+  "workPlaceTypes": {
+    "onsite": "#workplaceType-1",
+    "remote": "#workplaceType-2",
+    "hybrid": "#workplaceType-3"
+  },
+  "location": "United States",
+  "periodOfTime": "Past 24 hours",
+  "AvgExperience": 2,
+  "resolution": "--window-size=1400,900",
+  "baseURL": "https://www.linkedin.com/login",
+  "numberOfJobsPerPage": 25,
+  "startPage": 2,
+  "avoidJobTitles": [
+    "TEST",
+    "EMBEDDED",
+    "CHIEF",
+    "MANAGER",
+    "C++",
+    "SHAREPOINT",
+    "SHARE POINT",
+    "ARCHITECT",
+    "CLEARANCE",
+    "USC",
+    "GC",
+    "SECRET",
+    "TSSCI",
+    "POLY",
+    "TOP",
+    "LOCAL",
+    "CITIZEN",
+    "CITIZENSHIP",
+    "CLEARED",
+    "FOUNDING"
+  ],
+  "avoidCompanies": [
+    "Gallup",
+    "Test Company",
+    "Defense Systems",
+    "RLS Associates",
+    "Refonte Learning",
+    "Annonymous",
+    "IT Service",
+    "CyberCoders",
+    "Stealth",
+    "PTR Global",
+    "Compunnel"
+  ]
+}
